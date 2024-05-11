@@ -66,7 +66,7 @@ export default {
         },
         create() {
             var data = {
-                username: this.username,
+                name: this.username,
                 email: this.email,
                 password: this.password
             };
