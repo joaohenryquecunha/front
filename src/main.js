@@ -17,10 +17,10 @@ Vue.use(VueSweetalert2, options);
 
 
 /* URL da Host */
-Vue.prototype.urlHOST = 'http://localhost:8080'
+Vue.prototype.urlHOST = 'https://front-a0p6l1ydv-joaohenryquecunha.vercel.app/'
 
 /* URL API */
-axios.defaults.baseURL = 'http://localhost:8000/'
+axios.defaults.baseURL = 'api-larevel-tarefas-production.up.railway.app'
 
 import { BootstrapVue } from 'bootstrap-vue'
 
