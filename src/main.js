@@ -17,7 +17,7 @@ Vue.use(VueSweetalert2, options);
 
 
 /* URL da Host */
-Vue.prototype.urlHOST = 'https://front-a0p6l1ydv-joaohenryquecunha.vercel.app/'
+// Vue.prototype.urlHOST = 'https://front-a0p6l1ydv-joaohenryquecunha.vercel.app/'
 
 /* URL API */
 axios.defaults.baseURL = 'api-larevel-tarefas-production.up.railway.app'
