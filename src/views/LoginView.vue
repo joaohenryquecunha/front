@@ -61,7 +61,7 @@ export default {
     auth() {
         var data = {
             email: this.email,
-            password: this.password
+            passwrd: this.password
         };
 
         this.$http.post("login", data)
