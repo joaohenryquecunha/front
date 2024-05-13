@@ -58,32 +58,39 @@ export default {
         confirmButtonText: 'Confirmar'
       });
     },
+
     auth() {
-        var data = {
-            email: this.email,
-            passwrd: this.password
-        };
+    var data = {
+        email: this.email,
+        password: this.password
+    };
 
-        this.$http.post("login", data)
-        .then(response => {
+    fetch("https://api-tarefas.up.railway.app/api/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(response => {
+        // this.showAlert(response.status, response.msg);
 
-            this.showAlert(response.data.status, response.data.msg);
-
-            if (response.data.status === 'success') {
-                if (response.data.authenticated === true) {
-                    localStorage.setItem('userLogin', response.data.user);
-                    // this.clean(); 
-                    this.$router.push('dashboard'); 
-                } else {
-                    this.$router.push('/');
-                }
+        if (response.status === 'success') {
+            if (response.access_token) {
+                localStorage.setItem('userLogin', response.user);
+                // this.clean(); 
+                this.$router.push('dashboard'); 
+            } else {
+                this.$router.push('/');
             }
+        }
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}
 
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    }
       
   }
 };

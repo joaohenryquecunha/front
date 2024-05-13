@@ -8,15 +8,18 @@
                 <div class="form_login">
                     <div class="input_group">
                         <label class="group_label">Nome completo</label>
-                        <input class="group_input" v-model="username" type="text" name="username" placeholder="Digite seu nome">
+                        <input class="group_input" v-model="username" type="text" name="username"
+                            placeholder="Digite seu nome">
                     </div>
                     <div class="input_group">
                         <label class="group_label">Endereço de e-mail</label>
-                        <input class="group_input" v-model="email" type="email" name="email" placeholder="email@main.com.br">
+                        <input class="group_input" v-model="email" type="email" name="email"
+                            placeholder="email@main.com.br">
                     </div>
                     <div class="input_group">
                         <label class="group_label">Senha de acesso</label>
-                        <input class="group_input" v-model="password" type="password" name="password" placeholder="********">
+                        <input class="group_input" v-model="password" type="password" name="password"
+                            placeholder="********">
                     </div>
                     <div class="submit_forget">
                         <router-link class="link" to="/login">Já tenho conta</router-link>
@@ -41,28 +44,28 @@
         </div>
     </main>
 </template>
-  
+
 <script>
 export default {
     data() {
         return {
-            username:'',
+            name: '',
             email: '',
-            password: ''
+            password: '',
         };
     },
     methods: {
-        clean(){
-        this.username = '';
-        this.email = '';
-        this.password = '';
+        clean() {
+            this.name = '';
+            this.email = '';
+            this.password = '';
         },
         showAlert(type, msg) {
-        this.$swal({
-            text: msg,
-            icon: type,
-            confirmButtonText: 'Confirmar'
-        });
+            this.$swal({
+                text: msg,
+                icon: type,
+                confirmButtonText: 'Confirmar'
+            });
         },
         create() {
             var data = {
@@ -71,20 +74,25 @@ export default {
                 password: this.password
             };
 
-            this.$http.post("registro", data)
-            .then(response => {
-
-                if(response.data.status == 'success'){
-                    this.clean();
-                }
-
-                this.showAlert(response.data.status, response.data.msg);
+            fetch(this.$apiUrl + 'users', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
             })
-            .catch(error => {
-                console.error(error);
-            });
-        }
-        
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status == 201) {
+                        this.clean();
+                    }
+                    this.showAlert(data.status, data.msg);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
+
     }
 };
 </script>
