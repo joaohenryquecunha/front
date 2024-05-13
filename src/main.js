@@ -2,9 +2,10 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import axios from 'axios'
+// import axios from 'axios'
 import VueSweetalert2 from 'vue-sweetalert2';
 import DatePicker from 'vue2-datepicker';
+import apiUrl from './api.js';
 
 
 
@@ -20,7 +21,7 @@ Vue.use(VueSweetalert2, options);
 // Vue.prototype.urlHOST = 'https://front-a0p6l1ydv-joaohenryquecunha.vercel.app/'
 
 /* URL API */
-axios.defaults.baseURL = 'api-larevel-tarefas-production.up.railway.app'
+// axios.defaults.baseURL = 'api-larevel-tarefas-production.up.railway.app'
 
 import { BootstrapVue } from 'bootstrap-vue'
 
@@ -32,7 +33,7 @@ import 'vue2-datepicker/index.css';
 Vue.use(BootstrapVue)
 Vue.use(DatePicker)
 
-Vue.prototype.$http = axios
+Vue.prototype.$apiUrl = apiUrl;
 Vue.config.productionTip = false
 
 new Vue({
