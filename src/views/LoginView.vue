@@ -17,7 +17,7 @@
                 <div class="title">
                     <label for="">Login</label>
                 </div>
-                <div class="form_login">
+                <form class="form_login" @submit.prevent="auth">
                     <div class="input_group">
                         <label class="group_label">Endereço de e-mail</label>
                         <input class="group_input" v-model="email" type="email" name="email" placeholder="email@main.com.br">
@@ -28,11 +28,11 @@
                     </div>
                     <div class="submit_forget">
                         <router-link class="link" to="/register">Não tenho conta</router-link>
-                        <button @click="auth" class="btn-submit btn-dark">
+                        <button class="btn-submit btn-dark" type="submit">
                             Acessar
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </main>
@@ -80,7 +80,7 @@ export default {
             if (response.access_token) {
                 localStorage.setItem('userLogin', response.user);
                 // this.clean(); 
-                this.$router.push('dashboard'); 
+                this.$router.push({name:'home'}); 
             } else {
                 this.$router.push('/');
             }
