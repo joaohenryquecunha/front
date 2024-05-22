@@ -65,7 +65,7 @@ export default {
         password: this.password
     };
 
-    fetch("https://api-tarefas.up.railway.app/api/login", {
+    fetch(this.$apiUrl + "login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
