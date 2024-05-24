@@ -9,7 +9,7 @@ class ApiService {
 
   constructor() {
     if (process.env.NODE_ENV === "production") {
-      this.baseURL = "https://api-cty-production.up.railway.app/";
+      this.baseURL = "api-tarefas.up.railway.app";
     } else {
       this.baseURL = "http://localhost:8000/api/";
     }
