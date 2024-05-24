@@ -9,9 +9,9 @@ class ApiService {
 
   constructor() {
     if (process.env.NODE_ENV === "production") {
-      this.baseURL = "api-tarefas.up.railway.app";
+      this.baseURL = "api-tarefas.up.railway.app/api/";
     } else {
-      this.baseURL = "http://localhost:8000/api/";
+      this.baseURL = "api-tarefas.up.railway.app/api/";
     }
     this.axiosInstance = axios.create({
       baseURL: this.baseURL,
