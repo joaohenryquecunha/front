@@ -78,7 +78,7 @@
       </div>
     </b-modal>
 
-   <b-modal ref="modal-view-task" id="modal-view-task" centered hide-footer hide-header>
+    <b-modal ref="modal-view-task" id="modal-view-task" centered hide-footer hide-header>
       <div class="modal-all">
         <div class="header-modal">
           <div :class="{ 'time': 'time', 'venc': isTaskVencida(currentTask?.due_date) }">
@@ -106,8 +106,8 @@
           <div class="right">
             <div class="task">
               <div class="check-task">
-                <input type="checkbox" :id="'task-view-' + currentTask.id" hidden :checked="currentTask.status === 'completed'"
-                  @change="toggleTaskStatus(currentTask)" />
+                <input type="checkbox" :id="'task-view-' + currentTask.id" hidden
+                  :checked="currentTask.status === 'completed'" @change="toggleTaskStatus(currentTask)" />
                 <label class="checkbox" :for="'task-view-' + currentTask.id">
                   <span class="check">
                     <img src="@/assets/images/check.svg" alt="" />
@@ -205,17 +205,21 @@
 
     <main class="content">
       <section class="sidebar">
-        <div @click="load(0)" class="item">
+        <div @click="getTasks(0)" class="item">
           <img src="@/assets/images/inbox.svg" alt="" />
           <label for="">Entrada</label>
         </div>
-        <div @click="load(1)" class="item">
+        <div @click="getTasks(1)" class="item">
           <img src="@/assets/images/tasks.svg" alt="" />
           <label for="">Tarefas de hoje</label>
         </div>
-        <div @click="load(2)" class="item">
+        <div @click="getTasks(2)" class="item">
           <img src="@/assets/images/warning.svg" alt="" />
           <label for="">Vencidos</label>
+        </div>
+        <div @click="getTasks(3)" class="item">
+          <img src="@/assets/images/check_24.svg" alt="" />
+          <label for="">Concluído</label>
         </div>
       </section>
       <section class="base">
@@ -234,7 +238,7 @@
                   </span>
                 </label>
               </div>
-              <div class="info-task" >
+              <div class="info-task">
                 <label class="title-task" @click="modalView(0, task)" style="cursor: pointer">{{ task.title }}</label>
                 <div class="extra-desc">
                   <p class="description-task">
@@ -292,14 +296,15 @@
                 <div class="functions-sub">
                   <label class="title-task" :for="'task-' + task.id + '-sub-' + subtask.id">{{ subtask.title }}</label>
                   <div class="functions-task">
-                    <span @click="editSubTask(0, task, subtask)" class="function" v-b-tooltip.hover title="Editar subtarefa">
+                    <span @click="editSubTask(0, task, subtask)" class="function" v-b-tooltip.hover
+                      title="Editar subtarefa">
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M13.1038 1.66848C13.3158 1.45654 13.5674 1.28843 13.8443 1.17373C14.1212 1.05903 14.418 1 14.7177 1C15.0174 1 15.3142 1.05903 15.5911 1.17373C15.868 1.28843 16.1196 1.45654 16.3315 1.66848C16.5435 1.88041 16.7116 2.13201 16.8263 2.40891C16.941 2.68582 17 2.9826 17 3.28232C17 3.58204 16.941 3.87882 16.8263 4.15573C16.7116 4.43263 16.5435 4.68423 16.3315 4.89617L5.43807 15.7896L1 17L2.21038 12.5619L13.1038 1.66848Z"
                           stroke="#81858E" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </span>
-                    <span @click="deleteSubTask(task.id,subtask.id)" class="function" v-b-tooltip.hover
+                    <span @click="deleteSubTask(task.id, subtask.id)" class="function" v-b-tooltip.hover
                       title="Excluir subtarefa">
                       <svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -329,16 +334,12 @@
 </template>
 
 <script>
-export default {
-  beforeRouteEnter(to, from, next) {
-    const user = localStorage.getItem('userLogin');
 
-    if (user == '' || user == null || user == undefined) {
-      next('/'); // Redireciona para a página inicial
-    } else {
-      next(); // Continua para a rota da Dashboard
-    }
-  },
+import ApiService from "@/services/ApiService";
+import { tarefa, subtarefa } from '@/services/index';
+
+export default {
+
   data() {
     return {
       userAuth: '',
@@ -346,11 +347,9 @@ export default {
       currentDate: new Date().toISOString().split('T')[0],
       listTask: [],
       subtarefas: [],
-      listViewSubTask: [],
       allTasks: [],
       tasks: '',
       idTask: null,
-      tokenTask: '',
       nameTask: '',
       descTask: '',
       vencTask: '',
@@ -358,51 +357,36 @@ export default {
       updatedTask: '',
       filter: null,
       subTask: null,
-      currentFilterTitle: 'Entrada'
+      currentTask: null,
+      currentFilterTitle: 'Entrada',
+      token: null
     };
   },
-  methods: {
-    load(filter = 0) {
-  
-    
-      let url = `${this.$apiUrl}tarefas?type=${filter}`;
 
-      fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
-      .then(data => {
-        this.listTask = data;
-      })
-      .catch(error => {
-        console.error('There was a problem with your fetch operation:', error);
-      });
+  methods: {
+
+    async getTasks(filter = 0) {
+      try {
+        const resp = await ApiService.get(tarefa.routes.getTasks(filter));
+        this.listTask = resp.data;
+
+      } catch (error) {
+        console.error('Erro ao obter tarefas:', error.message);
+      }
+
     },
 
-  updateFilterTitle(filter) {
-    if (filter === 1) {
-      this.currentFilterTitle = 'Tarefas de hoje';
-    } else if (filter === 2) {
-      this.currentFilterTitle = 'Vencidos';
-    } else {
-      this.currentFilterTitle = 'Entrada';
-    }
-  },
-  updateLocalStorage(filter, data) {
-    const cacheKey = `tasks-${filter}`;
-    localStorage.setItem(cacheKey, JSON.stringify(data));
-  },
 
-
-
+    updateFilterTitle(filter) {
+      if (filter === 1) {
+        this.currentFilterTitle = 'Tarefas de hoje';
+      } else if (filter === 2) {
+        this.currentFilterTitle = 'Vencidos';
+      } else {
+        this.currentFilterTitle = 'Entrada';
+      }
+    },
+ 
     logout() {
       localStorage.removeItem('userLogin');
       this.$router.push('/login');
@@ -410,13 +394,13 @@ export default {
 
     clean() {
       this.idTask = '';
-      this.tokenTask = '';
       this.nameTask = '';
       this.descTask = '';
       this.vencTask = '';
       this.createdTask = '';
       this.updatedTask = '';
     },
+
     showAlert(type, msg) {
       this.$swal({
         text: msg,
@@ -424,35 +408,25 @@ export default {
         confirmButtonText: 'Confirmar'
       });
 
-      this.load();
+      this.getTasks();
     },
-    filteredTasks(type) {
-      if (type === 0) {
-        this.load();
-      } else if (type === 1) {
-        const today = new Date().toISOString().slice(0, 10);
-        this.allTasks = this.listTask.filter(task => task.due_date === today);
-      } else if (type === 2) {
-        const today = new Date().toISOString().slice(0, 10);
-        this.listTask = this.allTasks.filter(task => task.due_date < today);
-      } else {
-        this.listTask = this.allTasks;
-      }
-
-      this.clean();
-    },
+  
     modalNew() {
       this.$refs["modal-new-task"].hide();
     },
+
     modalSubNew() {
       this.$refs["modal-new-subtask"].hide();
     },
+
     modalEdit() {
       this.$refs["modal-edit-task"].hide();
     },
+
     modalSubEdit() {
       this.$refs["modal-edit-subtask"].hide();
     },
+
     modalView(index, task) {
       if (index === 0) {
         this.currentTask = task;
@@ -465,19 +439,10 @@ export default {
         this.currentTask = null;
       }
     },
-    toggleTaskStatus(task) {
-      // Sua lógica para alternar o status da tarefa
-    },
-    toggleSubtaskStatus(task, subtask) {
-      // Sua lógica para alternar o status da subtarefa
-    },
-    // Outros métodos
-  
-
 
     formatDate(type, date) {
       if (!date) {
-        return ''; // Retorna uma string vazia se não houver data ou hora
+        return '';
       }
 
       const dateFormat = new Date(date);
@@ -490,6 +455,7 @@ export default {
       }
 
     },
+
     functionTask() {
       this.showFunctionTask = !this.showFunctionTask;
     },
@@ -504,6 +470,7 @@ export default {
       return dataAtual > dataVenc;
 
     },
+
     copyLink(id, token) {
 
       const url = `${this.urlHOST}/view/${id}/${token}`
@@ -515,8 +482,8 @@ export default {
       }
 
       this.showAlert('success', 'O link da tarefa foi copiado!');
-
     },
+
     async createTask(type) {
       if (type === 0) {
         this.clean();
@@ -527,48 +494,23 @@ export default {
           description: this.descTask,
           due_date: this.vencTask,
         };
-
         try {
-          const response = await fetch(this.$apiUrl + "tarefas", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              // "Authorization": `Bearer ${this.userToken}`, // Adicione o token de autenticação, se necessário
-            },
-            body: JSON.stringify(data),
-          });
-
-          const result = await response.json();
+          const resp = await ApiService.post(tarefa.routes.createTasks(), data);
           this.clean();
-
-          if (result.status === 'success') {
-            this.modalNew();
-          }
-
-          this.showAlert(result.status, result.msg);
+          this.modalNew();
+          this.showAlert('success', resp.msg);
+          
         } catch (error) {
           console.error('Error creating task:', error);
           this.showAlert('error', 'An error occurred while creating the task.');
         }
       }
     },
+
     deleteTask(task) {
-      fetch(this.$apiUrl + "tarefas/" + task, {
-        method: 'DELETE'
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          this.showAlert(data.status, data.msg);
-        })
-        .catch(error => {
-          console.error('There was a problem with the fetch operation:', error);
-          this.showAlert('error', 'Failed to delete the task.');
-        });
+      const resp = ApiService.delete(tarefa.routes.deleteTasks(task));
+      console.log(resp);
+      this.showAlert('success', resp.msg);
     },
 
     async editTask(type, task = null) {
@@ -585,21 +527,12 @@ export default {
           description: this.descTask,
           due_date: this.vencTask,
         };
-
         try {
-          const response = await fetch(this.$apiUrl + "tarefas/" + this.idTask, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              // "Authorization": `Bearer ${this.userToken}`, // Adicione o token de autenticação, se necessário
-            },
-            body: JSON.stringify(data),
-          });
+          const resp = await ApiService.put(tarefa.routes.updateTasks(this.idTask), data);
 
-          const result = await response.json();
           this.clean();
           this.modalEdit();
-          this.showAlert(result.status, result.msg);
+          this.showAlert('success', resp.msg);
 
         } catch (error) {
           console.error('Error editing task:', error);
@@ -608,166 +541,139 @@ export default {
       }
     },
 
-    createSubTask(type, task) {
+    async createSubTask(type, task) {
       if (type == 0) {
-        // this.clean();
         this.idTask = task;
         this.$refs["modal-new-subtask"].show();
       } else {
         const data = {
-          // id_tarefa: this.idTask,
           title: this.nameTask,
           description: this.descTask,
           status: 'pending'
         };
-        fetch(this.$apiUrl + `tarefas/${this.idTask}/subtarefas`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data)
-        })
-          .then(response => response.json())
-          .then(data => {
-            this.clean();
 
-            if (data.status === 'success') {
-              this.modalSubNew();
-            }
+        try {
+          const resp = await ApiService.post(subtarefa.routes.createSubTasks(this.idTask), data);
 
-            this.showAlert(data.status, data.msg);
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
+          this.clean();
+          this.modalSubNew();
+          this.showAlert('success', resp.msg);
+
+        } catch (error) {
+          console.error('Error:', error);
+        }
       }
     },
 
-    deleteSubTask(task, subtask) {
-  fetch(this.$apiUrl + `tarefas/${task}/subtarefas/${subtask}`, {
-    method: 'DELETE',
-    headers: {
-      'Accept': 'application/json'
-    }
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    return response.json();
-  })
-  .then(data => {
-    this.showAlert(data.status, data.message);
-  })
-  .catch(error => {
-    console.error('There was a problem with your fetch operation:', error);
-  });
-},
-
-editSubTask(type, task, subTask) {
-  if (type == 0) {
-    // Popula os campos do modal de edição com os dados da subtarefa
-    this.nameTask = subTask.title;
-    this.descTask = subTask.description;
-    this.idTask = task.id;
-    this.subTask = subTask.id; 
-
-    this.$refs["modal-edit-subtask"].show();
-  } else {
-    var data = {
-      title: this.nameTask,
-      description: this.descTask,
-      status: 'pending'
-    };
-
-    fetch(`${this.$apiUrl}tarefas/${this.idTask}/subtarefas/${this.subTask}`, {
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.message === 'Successfully updated subtask') {
-        const taskIndex = this.listTask.findIndex(t => t.id === this.idTask);
-        if (taskIndex !== -1) {
-          const subTaskIndex = this.listTask[taskIndex].subtarefas.findIndex(st => st.id === this.subTask);
-          if (subTaskIndex !== -1) {
-            // Atualiza a subtarefa no array
-            this.$set(this.listTask[taskIndex].subtarefas, subTaskIndex, data.subtarefa);
-          }
-        }
-
-        this.clean();
-        this.$refs["modal-edit-subtask"].hide();
-        this.showAlert('success', data.message);
-        // Atualize a lista de subtarefas ou faça qualquer outra ação necessária
-      } else {
-        this.showAlert('error', data.message);
+    async deleteSubTask(task, subtask) {
+      try {
+        const resp = await ApiService.delete(subtarefa.routes.deleteSubTasks(task, subtask));
+        this.showAlert('success', resp.message);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        
       }
-    })
-    .catch(error => {
-      console.error('There was a problem with your fetch operation:', error);
-      this.showAlert('error', 'There was a problem with your request');
-    });
-  }
-},
+    },
 
+    async editSubTask(type, task, subTask) {
+      if (type == 0) {
+        this.nameTask = subTask.title;
+        this.descTask = subTask.description;
+        this.idTask = task.id;
+        this.subTask = subTask.id;
 
+        this.$refs["modal-edit-subtask"].show();
+      } else {
+        var data = {
+          title: this.nameTask,
+          description: this.descTask,
+          status: 'pending'
+        };
+
+        try {
+          const resp = await ApiService.put(subtarefa.routes.updateSubTasks(this.idTask, this.subTask), data);
+  
+          if (resp.message === 'Successfully updated subtask') {
+                const taskIndex = this.listTask.findIndex(t => t.id === this.idTask);
+                if (taskIndex !== -1) {
+                  const subTaskIndex = this.listTask[taskIndex].subtarefas.findIndex(st => st.id === this.subTask);
+                  if (subTaskIndex !== -1) {
+                    this.$set(this.listTask[taskIndex].subtarefas, subTaskIndex, resp.subtarefa);
+                  }
+                }
+              }
+                this.clean();
+                this.$refs["modal-edit-subtask"].hide();
+                this.showAlert('success', resp.message);
+          
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      }
+    },
 
     async toggleTaskStatus(task) {
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
 
-      const newStatus = task.status === 'completed' ? 'pending' : 'completed';
-
-      try {
-        const response = await fetch(this.$apiUrl + `tarefas/${task.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({ status: newStatus }),
-        });
-
-        if (response.ok) {
-          task.status = newStatus;
-        } else {
-          console.error('Erro ao atualizar o status da tarefa');
-        }
-      } catch (error) {
-        console.error('Erro na requisição:', error);
+    try {
+      const response = await ApiService.put(tarefa.routes.updateTasks(task.id), { status: newStatus });
+      if (response.status === 200) {
+        task.status = newStatus;
+        await this.reloadTasks(); // Recarregar tarefas após atualização
       }
-    },
-    async toggleSubtaskStatus(task, subtask) {
-      const newStatus = subtask.status === 'completed' ? 'pending' : 'completed';
-
-      try {
-        const response = await fetch(this.$apiUrl + `tarefas/${task.id}/subtarefas/${subtask.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({ status: newStatus }),
-
-        });
-
-        if (response.ok) {
-          subtask.status = newStatus;
-        } else {
-          console.error('Erro ao atualizar o status da subtarefa');
-        }
-      } catch (error) {
-        console.error('Erro na requisição:', error);
-      }
-    },
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
   },
+
+  async toggleSubtaskStatus(task, subtask) {
+    const newStatus = subtask.status === 'completed' ? 'pending' : 'completed';
+
+    try {
+      const response = await ApiService.put(subtarefa.routes.updateSubTasks(task.id, subtask.id), { status: newStatus });
+      if (response.status === 200) {
+        subtask.status = newStatus;
+        await this.reloadTasks(); // Recarregar tarefas após atualização
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
+  },
+
+  async reloadTasks() {
+    try {
+      const response = await ApiService.get(tarefa.routes.getAllTasks());
+      if (response.status === 200) {
+        this.listTask = response.data;
+        this.updateCurrentTask(); // Atualizar currentTask se necessário
+      }
+    } catch (error) {
+      console.error('Erro ao recarregar tarefas:', error);
+    }
+  },
+
+  updateCurrentTask() {
+    if (this.idTask !== null) {
+      this.currentTask = this.listTask.find(task => task.id === this.idTask) || null;
+    }
+  },
+  },
+
   created() {
     this.urlBase = this.$root.urlBase;
     this.userAuth = localStorage.getItem('userLogin');
-    this.load();
-  }
+    this.getTasks();
+  },
+
+  beforeRouteEnter(to, from, next) {
+    const user = localStorage.getItem('userLogin');
+
+    if (user == '' || user == null || user == undefined) {
+      next('/'); // Redireciona para a página inicial
+    } else {
+      next(); // Continua para a rota da Dashboard
+    }
+  },
 };
 </script>

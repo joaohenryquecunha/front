@@ -8,7 +8,7 @@
                 <div class="form_login">
                     <div class="input_group">
                         <label class="group_label">Nome completo</label>
-                        <input class="group_input" v-model="username" type="text" name="username"
+                        <input class="group_input" v-model="name" type="text" name="name"
                             placeholder="Digite seu nome">
                     </div>
                     <div class="input_group">
@@ -69,7 +69,7 @@ export default {
         },
         create() {
             var data = {
-                name: this.username,
+                name: this.name,
                 email: this.email,
                 password: this.password
             };
@@ -86,7 +86,7 @@ export default {
                     if (data.status == 201) {
                         this.clean();
                     }
-                    this.showAlert(data.status, data.msg);
+                    this.showAlert('success', data.msg);
                 })
                 .catch(error => {
                     console.error(error);
