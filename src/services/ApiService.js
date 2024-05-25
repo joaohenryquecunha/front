@@ -1,18 +1,15 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-
 class ApiService {
   static instance = null;
   axiosInstance;
   baseURL;
 
   constructor() {
-    if (process.env.NODE_ENV === "production") {
-      this.baseURL = "https://api-cty-production.up.railway.app/";
-    } else {
-      this.baseURL = "http://localhost:8000/api/";
-    }
+
+    this.baseURL = process.env.VUE_APP_API_URL;
+    console.log(process.env.VUE_APP_API_URL);
     this.axiosInstance = axios.create({
       baseURL: this.baseURL,
     });
