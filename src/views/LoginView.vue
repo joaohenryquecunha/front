@@ -132,7 +132,7 @@ export default {
 
     .login_register .base_form .submit_forget .btn-submit {
     width: 130px;
-    height: 55px;
+    height: 50px;
     }
 
     .form_login {
