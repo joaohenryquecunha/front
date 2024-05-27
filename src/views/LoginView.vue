@@ -1,5 +1,5 @@
 <template>
-    <main class="main">
+    <main class="main" :class="{ mobile: isMobile }">
         <div class="login_register">
             <div class="base_info">
                 <div class="icon">
@@ -47,7 +47,8 @@ export default {
   data() {
     return {
         email: '',
-        password: ''
+        password: '',
+        isMobile: false
     };
   },
   methods: {
@@ -73,41 +74,72 @@ export default {
 
     if(resp.data.status === 'success') {
         localStorage.setItem('userLogin', resp.data.user);
-        let cookie = Cookies.set("access_token", resp.data.access_token);
-        console.log('cookie',cookie);
+        Cookies.set("access_token", resp.data.access_token);
         this.$router.push({name:'home'});
         // this.$router.push('/dashboard');
     }
-
-    // fetch(this.$apiUrl + "login", {
-    //     method: "POST",
-    //     headers: {
-    //         "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    // })
-    // .then(response => response.json())
-    // .then(response => {
-    //     // this.showAlert(response.status, response.msg);
-
-    //     if (response.status === 'success') {
-    //         if (response.access_token) {
-    //             const token = response.access_token;
-    //             Cookies.set('access_token', token, { expires: 7 });
-    //             localStorage.setItem('userLogin', response.user);
-    //             // this.clean(); 
-    //             this.$router.push({name:'home'}); 
-    //         } else {
-    //             this.$router.push('/');
-    //         }
-    //     }
-    // })
-    // .catch(error => {
-    //     console.error(error);
-    // });
+  },      
 }
-
-      
-  }
 };
 </script>
+
+<style scoped>
+@media(max-width:768px){
+    .login_register{
+        display: grid;
+        justify-content: center;
+        padding: 0px;
+    }
+
+    .objects {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login_register .base_info .objects {
+    width: 100%;
+    height: 100px;
+}
+
+    .base_info {
+        width: 100%;
+        padding: 12px 15px   
+    }
+
+    .base_form {
+        width: 100%;
+        align-items: center;
+    }
+
+    .submit_forget {
+        width: 100% !important;
+        gap: 10px
+
+    }
+
+    .group_label {
+        width: 100%;
+    }
+
+    .input_group .group_input {
+    width: 100%;
+    }
+    .login_register .base_info .description {
+        margin-bottom: 20px;
+    }
+
+    .login_register .base_form .submit_forget .btn-submit {
+    width: 130px;
+    height: 55px;
+    }
+
+    .form_login {
+        width: 95%;
+    }
+}
+
+
+    
+
+</style>
