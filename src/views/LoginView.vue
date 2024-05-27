@@ -89,6 +89,7 @@ export default {
         display: grid;
         justify-content: center;
         padding: 0px;
+        height: 90%;
     }
 
     .objects {
@@ -140,7 +141,7 @@ export default {
 
     .login_register .base_info .icon img {
     position: relative;
-    top: -45px;
+    top: -90px;
 }
 }
 
