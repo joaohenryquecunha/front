@@ -8,8 +8,7 @@
                 <div class="form_login">
                     <div class="input_group">
                         <label class="group_label">Nome completo</label>
-                        <input class="group_input" v-model="name" type="text" name="name"
-                            placeholder="Digite seu nome">
+                        <input class="group_input" v-model="name" type="text" name="name" placeholder="Digite seu nome">
                     </div>
                     <div class="input_group">
                         <label class="group_label">Endereço de e-mail</label>
@@ -46,6 +45,10 @@
 </template>
 
 <script>
+
+import ApiService from "@/services/ApiService";
+import { register } from '@/services/index';
+
 export default {
     data() {
         return {
@@ -74,24 +77,17 @@ export default {
                 password: this.password
             };
 
-            fetch(this.$apiUrl + 'users', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status == 201) {
-                        this.clean();
-                    }
-                    this.showAlert('success', data.msg);
-                })
-                .catch(error => {
-                    console.error(error);
-                });
+            try {
+                const resp = ApiService.post(register.routes.register(), data);
+                this.showAlert('success', resp.msg);
+                this.clean();
+                // this.$router.push({name:'login'});
+
+            } catch (error) {
+                console.error(error);
+
             }
+        }
 
     }
 };
