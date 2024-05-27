@@ -137,6 +137,11 @@ export default {
     .form_login {
         width: 95%;
     }
+
+    .login_register .base_info .icon img {
+    position: relative;
+    top: -45px;
+}
 }
 
 
